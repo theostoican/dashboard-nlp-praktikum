@@ -2,6 +2,6 @@
 
 [Edit on StackBlitz ⚡️](https://stackblitz.com/edit/react-ugrkdc)
 
-Start locally by running:
+Or start locally by running:
 
 - npm run start
