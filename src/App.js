@@ -68,6 +68,11 @@ export default function App() {
   const [activeConversation, setActiveConversation] = React.useState(null);
   const [disableButtons, setDisableButtons] = React.useState(true);
   const [loadingConversations, setLoadingConversations] = React.useState(false);
+
+  const [loadingSummaries, setLoadingSummaries] = React.useState(false);
+  const [activeSummary, setActiveSummary] = React.useState(null);
+  const [convIdToSummary, setConvIdToSummary] = React.useState(null);
+
   const [loadingTopics, setLoadingTopics] = React.useState(false);
   const [convIdToTopicProbs, setConvIdToTopicProbs] = React.useState(null);
   const [idxToTopicLabel, setIdxToTopicLabel] = React.useState(null);
@@ -108,8 +113,12 @@ export default function App() {
   });
 
   const handleSliderChange = (event, newConversationNumber) => {
+    const conversationId = Object.keys(conversations[newConversationNumber])[0];
     setConversationNumber(newConversationNumber);
     setActiveConversation(Object.values(conversations[conversationNumber])[0]);
+    if (convIdToSummary && conversationId in convIdToSummary) {
+      setActiveSummary(convIdToSummary[conversationId]);
+    }
     if (convIdToTopicProbs) {
       setTopicsPieChart({
         name: 'React',
@@ -216,6 +225,13 @@ export default function App() {
     setLoadingConversations(true);
     setActiveConversation(null);
     setConversations([]);
+    setConversationNumber(0);
+
+    setActiveSummary(null);
+    setConvIdToSummary(null);
+
+    setConvIdToTopicProbs(null);
+    setIdxToTopicLabel(null);
     setTopicsPieChart({});
 
     fetch('http://127.0.0.1:8787/search?query=' + inputQuery)
@@ -287,6 +303,29 @@ export default function App() {
             }
           }
         });
+      });
+  };
+
+  const fetchSummaries = () => {
+    setLoadingSummaries(true);
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        conversations: conversations
+      })
+    };
+    fetch('http://127.0.0.1:8787/summarize', requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        const conversationId = Object.keys(
+          conversations[conversationNumber]
+        )[0];
+
+        setLoadingSummaries(false);
+        setConvIdToSummary(data['summaries']);
+        console.log(data);
+        setActiveSummary(data['summaries'][conversationId]);
       });
   };
 
@@ -430,18 +469,22 @@ export default function App() {
                 </Box>
                 <Box flexGrow={1}>
                   <Typography variant="body2" component="p">
-                    TODO: add summary
+                    {activeSummary}
                     <br />
                   </Typography>
                 </Box>
                 <Box className={classes.buttonCard}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={disableButtons}
-                  >
-                    Load
-                  </Button>
+                  {loadingSummaries && <CircularProgress size={24} />}
+                  {!loadingSummaries && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled={disableButtons}
+                      onClick={fetchSummaries}
+                    >
+                      Load
+                    </Button>
+                  )}
                 </Box>
               </CardContent>
             </Card>
