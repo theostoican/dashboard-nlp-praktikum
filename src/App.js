@@ -120,7 +120,12 @@ export default function App() {
     const conversationId = Object.keys(conversations[newConversationNumber])[0];
     setConversationNumber(newConversationNumber);
     setActiveConversation(
-      Object.values(conversations[conversationNumber])[0].join('<br />')
+      Object.values(conversations[conversationNumber])[0].map((line, idx) => (
+        <span key={idx}>
+          {line}
+          <br />
+        </span>
+      ))
     );
     if (convIdToSummary && conversationId in convIdToSummary) {
       setActiveSummary(convIdToSummary[conversationId]);
@@ -174,7 +179,14 @@ export default function App() {
       event.target.value === '' ? '' : Number(event.target.value)
     );
     setActiveConversation(
-      Object.values(conversations[conversationNumber])[0].join('<br />')
+      Object.values(conversations[conversationNumber])[0]..map(
+        (line, idx) => (
+          <span key={idx}>
+            {line}
+            <br />
+          </span>
+        )
+      )
     );
     if (convIdToTopicProbs) {
       setTopicsPieChart({
@@ -285,8 +297,13 @@ export default function App() {
           data['conversations']
         );
         setActiveConversation(
-          Object.values(flattened_conversations[conversationNumber])[0].join(
-            <br />
+          Object.values(flattened_conversations[conversationNumber])[0].map(
+            (line, idx) => (
+              <span key={idx}>
+                {line}
+                <br />
+              </span>
+            )
           )
         );
         setConversations(flattened_conversations);
