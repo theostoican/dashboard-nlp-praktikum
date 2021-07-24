@@ -122,6 +122,8 @@ export default function App() {
     setActiveConversation(Object.values(conversations[conversationNumber])[0]);
     if (convIdToSummary && conversationId in convIdToSummary) {
       setActiveSummary(convIdToSummary[conversationId]);
+    } else {
+      setActiveSummary(null);
     }
     if (convIdToTopicProbs) {
       setTopicsPieChart({
@@ -385,7 +387,11 @@ export default function App() {
         )[0];
 
         setLoadingSummaries(false);
-        setConvIdToSummary(data['summaries']);
+        if (convIdToSummary) {
+          convIdToSummary[conversationId] = Object.values(data['summaries'])[0];
+        } else {
+          setConvIdToSummary(data['summaries']);
+        }
         console.log(data);
         setActiveSummary(data['summaries'][conversationId]);
       });
