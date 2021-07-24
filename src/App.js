@@ -1,5 +1,4 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -14,48 +13,10 @@ import { CircularProgress } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import { Pie } from 'react-chartjs-2';
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1
-  },
-  card: {
-    height: 500,
-    width: 400
-  },
-  cardContent: {
-    height: '90%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start'
-  },
-  inputquery: {
-    marginLeft: theme.spacing(1),
-    flex: 1
-  },
-  iconButton: {
-    padding: 10
-  },
-  querybox: {
-    padding: '2px 4px',
-    display: 'flex',
-    alignItems: 'center',
-    width: 400
-  },
-  margin: {
-    height: theme.spacing(3)
-  },
-  slidercontainer: {
-    width: 300
-  },
-  buttonCard: {
-    alignSelf: 'flex-end'
-  },
-  typographyStyle: {
-    overflowY: 'auto'
-  }
-}));
+import { useStyles } from './styles';
+import ConversationsCard from './ConversationsCard';
+import TopicsCard from './TopicsCard';
+import SummaryCard from './SummaryCard';
 
 export default function App() {
   var inputQuery = '';
@@ -81,7 +42,7 @@ export default function App() {
   const [convIdToTopicProbs, setConvIdToTopicProbs] = React.useState(null);
   const [idxToTopicLabel, setIdxToTopicLabel] = React.useState(null);
   const [topicsPieChart, setTopicsPieChart] = React.useState({
-    name: 'React',
+    name: 'topicsPieChart',
     pieData: {
       labels: [],
       datasets: [
@@ -119,13 +80,16 @@ export default function App() {
   const handleSliderChange = (event, newConversationNumber) => {
     const conversationId = Object.keys(conversations[newConversationNumber])[0];
     setConversationNumber(newConversationNumber);
+
     setActiveConversation(
-      Object.values(conversations[conversationNumber])[0].map((line, idx) => (
-        <span key={idx}>
-          {line}
-          <br />
-        </span>
-      ))
+      Object.values(conversations[newConversationNumber])[0].map(
+        (line, idx) => (
+          <span key={idx}>
+            {line}
+            <br />
+          </span>
+        )
+      )
     );
     if (convIdToSummary && conversationId in convIdToSummary) {
       setActiveSummary(convIdToSummary[conversationId]);
@@ -134,7 +98,7 @@ export default function App() {
     }
     if (convIdToTopicProbs) {
       setTopicsPieChart({
-        name: 'React',
+        name: 'topicsPieChart',
         pieData: {
           labels: Object.values(idxToTopicLabel),
           datasets: [
@@ -188,7 +152,7 @@ export default function App() {
     );
     if (convIdToTopicProbs) {
       setTopicsPieChart({
-        name: 'React',
+        name: 'topicsPieChart',
         pieData: {
           labels: Object.values(idxToTopicLabel),
           datasets: [
@@ -313,6 +277,7 @@ export default function App() {
 
   const fetchTopics = () => {
     setLoadingTopics(true);
+    console.log(conversations);
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -328,7 +293,7 @@ export default function App() {
         setConvIdToTopicProbs(data['topics']);
         setIdxToTopicLabel(data['index_to_topic']);
         setTopicsPieChart({
-          name: 'React',
+          name: 'topicsPieChart',
           pieData: {
             labels: Object.values(data['index_to_topic']),
             datasets: [
@@ -486,58 +451,24 @@ export default function App() {
       <Grid item xs={12}>
         <Grid container justifyContent="center" spacing={spacing}>
           <Grid key="0" item>
-            <Card className={classes.card}>
-              <CardContent className={classes.cardContent}>
-                <Typography variant="h5" component="h2">
-                  Original Conversations
-                </Typography>
-                <Typography
-                  className={classes.typographyStyle}
-                  variant="body2"
-                  component="p"
-                >
-                  {activeConversation}
-                  <br />
-                </Typography>
-              </CardContent>
-            </Card>
+            <ConversationsCard activeConversation={activeConversation} />
           </Grid>
           <Grid key="1" item>
-            <Card className={classes.card}>
-              <CardContent className={classes.cardContent}>
-                <Box>
-                  <Typography variant="h5" component="h2">
-                    Topic Extraction
-                  </Typography>
-                </Box>
-
-                <Box flexGrow={1}>
-                  <Pie
-                    data={topicsPieChart.pieData}
-                    options={topicsPieChart.pieChartOptions}
-                    width={400}
-                    height={400}
-                  />
-                </Box>
-
-                <Box className={classes.buttonCard}>
-                  {loadingTopics && <CircularProgress size={24} />}
-                  {!loadingTopics && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      disabled={disableButtons}
-                      onClick={fetchTopics}
-                    >
-                      Load
-                    </Button>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
+            <TopicsCard
+              loadingTopics={loadingTopics}
+              fetchTopics={fetchTopics}
+              disableButtons={disableButtons}
+              topicsPieChart={topicsPieChart}
+            />
           </Grid>
           <Grid key="2" item>
-            <Card className={classes.card}>
+            <SummaryCard
+              loadingSummaries={loadingSummaries}
+              fetchSummaries={fetchSummaries}
+              disableButtons={disableButtons}
+              activeSummary={activeSummary}
+            />
+            {/* <Card className={classes.card}>
               <CardContent className={classes.cardContent}>
                 <Box>
                   <Typography variant="h5" component="h2">
@@ -564,7 +495,7 @@ export default function App() {
                   )}
                 </Box>
               </CardContent>
-            </Card>
+            </Card> */}
           </Grid>
         </Grid>
       </Grid>
