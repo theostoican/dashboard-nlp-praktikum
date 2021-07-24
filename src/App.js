@@ -179,14 +179,12 @@ export default function App() {
       event.target.value === '' ? '' : Number(event.target.value)
     );
     setActiveConversation(
-      Object.values(conversations[conversationNumber])[0]..map(
-        (line, idx) => (
-          <span key={idx}>
-            {line}
-            <br />
-          </span>
-        )
-      )
+      Object.values(conversations[conversationNumber])[0].map((line, idx) => (
+        <span key={idx}>
+          {line}
+          <br />
+        </span>
+      ))
     );
     if (convIdToTopicProbs) {
       setTopicsPieChart({
