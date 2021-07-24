@@ -243,7 +243,7 @@ export default function App() {
   //   return conv_list
 
   const flatten_tree = (root, tweets_list) => {
-    tweets_list.push(root);
+    tweets_list.push(root['text']);
     if (
       !('replies' in root) ||
       ('replies' in root && root['replies'].length == 0)
@@ -266,6 +266,8 @@ export default function App() {
       flatten_tree(conv_root, tweets_list);
       conv_list.push({ [conv_id]: tweets_list });
     }
+
+    return conv_list;
   };
 
   const fetchConversations = () => {
@@ -293,11 +295,11 @@ export default function App() {
 
         setHierarchicalConversations(data['conversations']);
 
+        console.log(data['conversations']);
+
         let flattened_conversations = flatten_conversations(
           data['conversations']
         );
-
-        console.log(flattened_conversations);
 
         setActiveConversation(
           Object.values(flattened_conversations[conversationNumber])[0]
@@ -402,13 +404,24 @@ export default function App() {
       <Grid item xs={12}>
         <Grid container spacing={8} justifyContent="center">
           <Grid item>
-            <Paper component="form" className={classes.querybox}>
+            <Paper
+              component="form"
+              className={classes.querybox}
+              onSubmit={event => {
+                event.preventDefault();
+              }}
+            >
               <InputBase
                 className={classes.inputquery}
                 placeholder="Enter query"
                 inputProps={{ 'aria-label': 'search query' }}
                 onChange={event => {
                   inputQuery = event.target.value;
+                }}
+                onKeyDown={event => {
+                  if (event.keyCode == 13) {
+                    fetchConversations();
+                  }
                 }}
               />
               <IconButton
@@ -527,7 +540,7 @@ export default function App() {
                     Text Summarization
                   </Typography>
                 </Box>
-                <Box flexGrow={1}>
+                <Box flexGrow={1} className={classes.typographyStyle}>
                   <Typography variant="body2" component="p">
                     {activeSummary}
                     <br />
