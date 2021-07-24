@@ -65,6 +65,10 @@ export default function App() {
   const [conversationNumber, setConversationNumber] = React.useState(0);
   const [maxConversationNumber, setMaxConversationNumber] = React.useState(0);
   const [conversations, setConversations] = React.useState(null);
+  const [
+    hierarchicalConversations,
+    setHierarchicalConversations
+  ] = React.useState(null);
   const [activeConversation, setActiveConversation] = React.useState(null);
   const [disableButtons, setDisableButtons] = React.useState(true);
   const [loadingConversations, setLoadingConversations] = React.useState(false);
@@ -216,6 +220,54 @@ export default function App() {
     }
   };
 
+  //   def flatten_tree(root, tweets_list):
+  //   tweets_list.append(root)
+
+  //   # no replies
+  //   if "replies" not in root or ("replies" in root and len(root["replies"]) == 0):
+  //     return
+
+  //   # Iterate over replies and recursively flatten it.
+  //   for reply in root["replies"]:
+  //     flatten_tree(reply, tweets_list)
+
+  // def flatten_conversations(conversations_list):
+  //   conv_list = []
+  //   for conv_dict in conversations_list:
+  //     tweets_list = []
+  //     # each conv dictionary has one item {conv_id: [tweets]}
+  //     conv_id, conv_root = next(iter(conv_dict.items()))
+  //     flatten_tree(conv_root, tweets_list)
+  //     conv_list.append({conv_id: tweets_list})
+
+  //   return conv_list
+
+  const flatten_tree = (root, tweets_list) => {
+    tweets_list.push(root);
+    if (
+      !('replies' in root) ||
+      ('replies' in root && root['replies'].length == 0)
+    ) {
+      return;
+    }
+    for (const reply of root['replies']) {
+      flatten_tree(reply, tweets_list);
+    }
+  };
+
+  const flatten_conversations = conversations_list => {
+    let conv_list = [];
+
+    for (const conv_dict of conversations_list) {
+      let tweets_list = [];
+      let conv_id = Object.keys(conv_dict)[0];
+      let conv_root = Object.values(conv_dict)[0];
+
+      flatten_tree(conv_root, tweets_list);
+      conv_list.push({ [conv_id]: tweets_list });
+    }
+  };
+
   const fetchConversations = () => {
     if (!inputQuery) {
       alert('Please provide input!');
@@ -239,11 +291,19 @@ export default function App() {
       .then(data => {
         setLoadingConversations(false);
 
-        setActiveConversation(
-          Object.values(data.conversations[conversationNumber])[0]
+        setHierarchicalConversations(data['conversations']);
+
+        let flattened_conversations = flatten_conversations(
+          data['conversations']
         );
-        setConversations(data.conversations);
-        setMaxConversationNumber(data.conversations.length - 1);
+
+        console.log(flattened_conversations);
+
+        setActiveConversation(
+          Object.values(flattened_conversations[conversationNumber])[0]
+        );
+        setConversations(flattened_conversations);
+        setMaxConversationNumber(flattened_conversations.length - 1);
 
         setDisableButtons(false);
       });
@@ -312,7 +372,7 @@ export default function App() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        conversations: conversations
+        conversations: [hierarchicalConversations[conversationNumber]]
       })
     };
     fetch('http://127.0.0.1:8787/summarize', requestOptions)
