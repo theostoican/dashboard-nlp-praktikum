@@ -1,7 +1,5 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Input from '@material-ui/core/Input';
@@ -10,9 +8,6 @@ import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import Slider from '@material-ui/core/Slider';
 import { CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
-import { Pie } from 'react-chartjs-2';
 import { useStyles } from './styles';
 import ConversationsCard from './ConversationsCard';
 import TopicsCard from './TopicsCard';
@@ -253,8 +248,6 @@ export default function App() {
 
         setHierarchicalConversations(data['conversations']);
 
-        console.log(data['conversations']);
-
         let flattened_conversations = flatten_conversations(
           data['conversations']
         );
@@ -277,7 +270,6 @@ export default function App() {
 
   const fetchTopics = () => {
     setLoadingTopics(true);
-    console.log(conversations);
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -289,7 +281,6 @@ export default function App() {
       .then(response => response.json())
       .then(data => {
         setLoadingTopics(false);
-        console.log(data);
         setConvIdToTopicProbs(data['topics']);
         setIdxToTopicLabel(data['index_to_topic']);
         setTopicsPieChart({
@@ -355,7 +346,6 @@ export default function App() {
         } else {
           setConvIdToSummary(data['summaries']);
         }
-        console.log(data);
         setActiveSummary(data['summaries'][conversationId]);
       });
   };
@@ -468,34 +458,6 @@ export default function App() {
               disableButtons={disableButtons}
               activeSummary={activeSummary}
             />
-            {/* <Card className={classes.card}>
-              <CardContent className={classes.cardContent}>
-                <Box>
-                  <Typography variant="h5" component="h2">
-                    Text Summarization
-                  </Typography>
-                </Box>
-                <Box flexGrow={1} className={classes.typographyStyle}>
-                  <Typography variant="body2" component="p">
-                    {activeSummary}
-                    <br />
-                  </Typography>
-                </Box>
-                <Box className={classes.buttonCard}>
-                  {loadingSummaries && <CircularProgress size={24} />}
-                  {!loadingSummaries && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      disabled={disableButtons}
-                      onClick={fetchSummaries}
-                    >
-                      Load
-                    </Button>
-                  )}
-                </Box>
-              </CardContent>
-            </Card> */}
           </Grid>
         </Grid>
       </Grid>
