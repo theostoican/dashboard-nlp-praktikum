@@ -119,7 +119,9 @@ export default function App() {
   const handleSliderChange = (event, newConversationNumber) => {
     const conversationId = Object.keys(conversations[newConversationNumber])[0];
     setConversationNumber(newConversationNumber);
-    setActiveConversation(Object.values(conversations[conversationNumber])[0]);
+    setActiveConversation(
+      Object.values(conversations[conversationNumber])[0].join('<br />')
+    );
     if (convIdToSummary && conversationId in convIdToSummary) {
       setActiveSummary(convIdToSummary[conversationId]);
     } else {
@@ -171,7 +173,9 @@ export default function App() {
     setConversationNumber(
       event.target.value === '' ? '' : Number(event.target.value)
     );
-    setActiveConversation(Object.values(conversations[conversationNumber])[0]);
+    setActiveConversation(
+      Object.values(conversations[conversationNumber])[0].join('<br />')
+    );
     if (convIdToTopicProbs) {
       setTopicsPieChart({
         name: 'React',
@@ -222,30 +226,8 @@ export default function App() {
     }
   };
 
-  //   def flatten_tree(root, tweets_list):
-  //   tweets_list.append(root)
-
-  //   # no replies
-  //   if "replies" not in root or ("replies" in root and len(root["replies"]) == 0):
-  //     return
-
-  //   # Iterate over replies and recursively flatten it.
-  //   for reply in root["replies"]:
-  //     flatten_tree(reply, tweets_list)
-
-  // def flatten_conversations(conversations_list):
-  //   conv_list = []
-  //   for conv_dict in conversations_list:
-  //     tweets_list = []
-  //     # each conv dictionary has one item {conv_id: [tweets]}
-  //     conv_id, conv_root = next(iter(conv_dict.items()))
-  //     flatten_tree(conv_root, tweets_list)
-  //     conv_list.append({conv_id: tweets_list})
-
-  //   return conv_list
-
   const flatten_tree = (root, tweets_list) => {
-    tweets_list.push(root['text']);
+    tweets_list.push(root['username'] + ': ' + root['text']);
     if (
       !('replies' in root) ||
       ('replies' in root && root['replies'].length == 0)
@@ -302,9 +284,10 @@ export default function App() {
         let flattened_conversations = flatten_conversations(
           data['conversations']
         );
-
         setActiveConversation(
-          Object.values(flattened_conversations[conversationNumber])[0]
+          Object.values(flattened_conversations[conversationNumber])[0].join(
+            <br />
+          )
         );
         setConversations(flattened_conversations);
         setMaxConversationNumber(flattened_conversations.length - 1);
@@ -326,7 +309,7 @@ export default function App() {
       .then(response => response.json())
       .then(data => {
         setLoadingTopics(false);
-        console.log(data['topics']);
+        console.log(data);
         setConvIdToTopicProbs(data['topics']);
         setIdxToTopicLabel(data['index_to_topic']);
         setTopicsPieChart({
